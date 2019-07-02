@@ -1,6 +1,6 @@
-=============
+=================
 S3 Chunk Uploader
-=============
+=================
 
 A Django file handler to manage piping uploaded files directly to S3 without passing through the server's file system.
 The uploader uses multiple threads to speed up the upload of larger files.
@@ -25,7 +25,7 @@ Quick start
 
 
 How it works
--------------
+------------
 The File Handler intercepts the file upload multipart request at the door, and as chunks of the file are received from the
 browser, they are collectd into an internal queue within custom ThreadPoolWorker. When the queue surpasses a configurable
 size (by default 5MB which is the minimum Part size for S3 multipart upload), it is submitted to the Thread Pool
