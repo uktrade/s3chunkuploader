@@ -11,17 +11,14 @@ upload behaviour to bypass local file system.
 Quick start
 -----------
 
-- Install the package::
+#. Install the package:
 
     pip install s3chunkuploader
 
 
-- Set the Django FILE_UPLOAD_HANDLERS setting:
+#. Set the Django FILE_UPLOAD_HANDLERS setting:
 
-    FILE_UPLOAD_HANDLERS = (
-        's3chunkuploader.file_handler.S3FileUploadHandler',
-    )
-
+    FILE_UPLOAD_HANDLERS = ('s3chunkuploader.file_handler.S3FileUploadHandler',)
 
 
 How it works
@@ -41,20 +38,20 @@ S3 File Field, but was not actually used to upload a full file.  The file is als
 
 It is recommended to bypass csrf checks on the upload file view as the csrf check will read the POST params before the
 handler is used.
-
+A replacement file field S3FileField is provided in fields.py and is satisfied with the S3 object key
 
 Settings
 --------
 
 The following settings are expected in your Django application (only 2 are required)
 
-============================ ================================================
+============================ =====================================================================================================
 Setting                      Description
-============================ ================================================
+============================ =====================================================================================================
 AWS_ACCESS_KEY_ID            Required. Your AWS access key
 AWS_SECRET_ACCESS_KEY        Required. The AWS secret
 S3_DOCUMENT_ROOT_DIRECTORY   Optional. Document root for all uploads (prefix)
 S3_APPEND_DATETIME_ON_UPLOAD Optional [True]. Appent the current datetime sring to the uploaded file name
 S3_PREFIX_QUERY_PARAM_NAME   Optional [__prefix]. A query param key name which provides additional prefix for the object key on S3
 S3_MIN_PART_SIZE             Optional [5MB]. The part size to upload to S3
-============================ ================================================
+============================ =====================================================================================================
