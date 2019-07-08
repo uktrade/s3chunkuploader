@@ -53,5 +53,6 @@ AWS_SECRET_ACCESS_KEY        Required. The AWS secret
 S3_DOCUMENT_ROOT_DIRECTORY   Optional. Document root for all uploads (prefix)
 S3_APPEND_DATETIME_ON_UPLOAD Optional [True]. Appent the current datetime sring to the uploaded file name
 S3_PREFIX_QUERY_PARAM_NAME   Optional [__prefix]. A query param key name which provides additional prefix for the object key on S3
-S3_MIN_PART_SIZE             Optional [5MB]. The part size to upload to S3
+S3_MIN_PART_SIZE             Optional [5MB]. The part size in bytes to upload to S3
+MAX_UPLOAD_SIZE              Optional [None]. The maximum file size in bytes for an individual file.
 ============================ =====================================================================================================
