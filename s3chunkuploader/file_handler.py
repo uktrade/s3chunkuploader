@@ -19,6 +19,7 @@ S3_DOCUMENT_ROOT_DIRECTORY = getattr(settings, 'S3_DOCUMENT_ROOT_DIRECTORY', '')
 S3_APPEND_DATETIME_ON_UPLOAD = getattr(settings, 'S3_APPEND_DATETIME_ON_UPLOAD', True)
 S3_PREFIX_QUERY_PARAM_NAME = getattr(settings, 'S3_PREFIX_QUERY_PARAM_NAME', '__prefix')
 S3_MIN_PART_SIZE = getattr(settings, 'S3_MIN_PART_SIZE', 5 * 1024 * 1024)
+MAX_UPLOAD_SIZE = getattr(settings, 'MAX_UPLOAD_SIZE', None)
 
 
 class S3Wrapper(object):
@@ -117,6 +118,12 @@ class ThreadedS3ChunkUploader(ThreadPoolExecutor):
             content_length = len(body)
             self.queue.append(body)
             self.current_queue_size += content_length
+
+            # If the current queue size is larger than the max upload size, abort
+            if MAX_UPLOAD_SIZE:
+                if self.current_queue_size > int(MAX_UPLOAD_SIZE):
+                    raise Exception('File too large')
+
         if not body or self.current_queue_size > S3_MIN_PART_SIZE:
             self.part_number += 1
             _body = self.drain_queue()
@@ -181,7 +188,9 @@ class S3FileUploadHandler(FileUploadHandler):
             self.client,
             self.bucket_name,
             key=self.s3_key,
-            upload_id=self.upload_id)
+            upload_id=self.upload_id
+        )
+
         # prepare a storages object as a file placeholder
         self.storage = S3Boto3Storage()
         self.file = S3Boto3StorageFile(self.s3_key, 'w', self.storage)
