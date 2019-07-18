@@ -113,16 +113,8 @@ class ThreadedS3ChunkUploader(ThreadPoolExecutor):
         Arguments:
             body {bytes} -- A file chunk
         """
-        content_length = 0
         if body:
-            content_length = len(body)
             self.queue.append(body)
-            self.current_queue_size += content_length
-
-            # If the current queue size is larger than the max upload size, abort
-            if MAX_UPLOAD_SIZE:
-                if self.current_queue_size > int(MAX_UPLOAD_SIZE):
-                    raise Exception('File too large')
 
         if not body or self.current_queue_size > S3_MIN_PART_SIZE:
             self.part_number += 1
@@ -174,6 +166,7 @@ class S3FileUploadHandler(FileUploadHandler):
         """
         Create the file object to append to as data is coming in.
         """
+        # If file size is larger than the maximum allowed, then abort
         if MAX_UPLOAD_SIZE:
             if self.content_length > MAX_UPLOAD_SIZE:
                 raise UploadFailed('File too large')
