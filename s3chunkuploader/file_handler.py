@@ -174,8 +174,9 @@ class S3FileUploadHandler(FileUploadHandler):
         """
         Create the file object to append to as data is coming in.
         """
-        if self.content_length > MAX_UPLOAD_SIZE:
-            raise UploadFailed('File too large')
+        if MAX_UPLOAD_SIZE:
+            if self.content_length > MAX_UPLOAD_SIZE:
+                raise UploadFailed('File too large')
         super().new_file(*args, **kwargs)
         self.parts = []
         self.bucket_name = settings.AWS_STORAGE_BUCKET_NAME
