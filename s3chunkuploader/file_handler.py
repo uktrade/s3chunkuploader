@@ -113,8 +113,11 @@ class ThreadedS3ChunkUploader(ThreadPoolExecutor):
         Arguments:
             body {bytes} -- A file chunk
         """
+        content_length = 0
         if body:
+            content_length = len(body)
             self.queue.append(body)
+            self.current_queue_size += content_length
 
         if not body or self.current_queue_size > S3_MIN_PART_SIZE:
             self.part_number += 1
