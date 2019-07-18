@@ -20,6 +20,7 @@ S3_DOCUMENT_ROOT_DIRECTORY = getattr(settings, 'S3_DOCUMENT_ROOT_DIRECTORY', '')
 S3_APPEND_DATETIME_ON_UPLOAD = getattr(settings, 'S3_APPEND_DATETIME_ON_UPLOAD', True)
 S3_PREFIX_QUERY_PARAM_NAME = getattr(settings, 'S3_PREFIX_QUERY_PARAM_NAME', '__prefix')
 S3_MIN_PART_SIZE = getattr(settings, 'S3_MIN_PART_SIZE', 5 * 1024 * 1024)
+CLEAN_FILE_NAME = getattr(settings, 'CLEAN_FILE_NAME', False)
 
 
 class S3Wrapper(object):
@@ -169,8 +170,9 @@ class S3FileUploadHandler(FileUploadHandler):
         super().new_file(*args, **kwargs)
         self.parts = []
         self.bucket_name = settings.AWS_STORAGE_BUCKET_NAME
-        self.safe_file_name = slugify(self.file)
-        self.s3_key = generate_object_key(self.request, self.safe_file_name)
+        if CLEAN_FILE_NAME:
+            self.file_name = slugify(self.file)
+        self.s3_key = generate_object_key(self.request, self.file_name)
         self.client = s3_client()
         self.multipart = self.client.create_multipart_upload(
             Bucket=self.bucket_name,
@@ -185,7 +187,7 @@ class S3FileUploadHandler(FileUploadHandler):
         # prepare a storages object as a file placeholder
         self.storage = S3Boto3Storage()
         self.file = S3Boto3StorageFile(self.s3_key, 'w', self.storage)
-        self.file.original_name = self.safe_file_name
+        self.file.original_name = self.file_name
 
     def handle_raw_input(self, input_data, META, content_length, boundary, encoding):
         self.request = input_data
