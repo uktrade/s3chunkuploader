@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # get some settings
 AWS_ACCESS_KEY_ID = getattr(settings, 'AWS_ACCESS_KEY_ID')  # Required
 AWS_SECRET_ACCESS_KEY = getattr(settings, 'AWS_SECRET_ACCESS_KEY')  # Required
-AWS_REGION = getattr(settings, 'AWS_REGION')
+AWS_REGION = getattr(settings, 'AWS_REGION', None)
 S3_DOCUMENT_ROOT_DIRECTORY = getattr(settings, 'S3_DOCUMENT_ROOT_DIRECTORY', '')
 S3_APPEND_DATETIME_ON_UPLOAD = getattr(settings, 'S3_APPEND_DATETIME_ON_UPLOAD', True)
 S3_PREFIX_QUERY_PARAM_NAME = getattr(settings, 'S3_PREFIX_QUERY_PARAM_NAME', '__prefix')
