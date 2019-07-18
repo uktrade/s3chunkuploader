@@ -20,6 +20,7 @@ S3_APPEND_DATETIME_ON_UPLOAD = getattr(settings, 'S3_APPEND_DATETIME_ON_UPLOAD',
 S3_PREFIX_QUERY_PARAM_NAME = getattr(settings, 'S3_PREFIX_QUERY_PARAM_NAME', '__prefix')
 S3_MIN_PART_SIZE = getattr(settings, 'S3_MIN_PART_SIZE', 5 * 1024 * 1024)
 MAX_UPLOAD_SIZE = getattr(settings, 'MAX_UPLOAD_SIZE', None)
+S3_ENDPOINT_URL = getattr(settings, 'S3_ENDPOINT_URL', None)
 
 
 class S3Wrapper(object):
@@ -32,11 +33,16 @@ class S3Wrapper(object):
     def get_client(cls):
         if not cls._s3_client:
             logger.debug('Instantiating S3 client')
+            extra_kwargs = {}
+            if S3_ENDPOINT_URL:
+                extra_kwargs['endpoint_url'] = S3_ENDPOINT_URL
+
             cls._s3_client = boto3.client(
                 's3',
                 aws_access_key_id=AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-                region_name=AWS_REGION)
+                region_name=AWS_REGION,
+                **extra_kwargs)
         return cls._s3_client
 
 
