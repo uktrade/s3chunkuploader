@@ -1,6 +1,8 @@
 import os
 import boto3
 import logging
+
+from django.utils.text import slugify
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from django.utils import timezone
@@ -19,6 +21,7 @@ S3_DOCUMENT_ROOT_DIRECTORY = getattr(settings, 'S3_DOCUMENT_ROOT_DIRECTORY', '')
 S3_APPEND_DATETIME_ON_UPLOAD = getattr(settings, 'S3_APPEND_DATETIME_ON_UPLOAD', True)
 S3_PREFIX_QUERY_PARAM_NAME = getattr(settings, 'S3_PREFIX_QUERY_PARAM_NAME', '__prefix')
 S3_MIN_PART_SIZE = getattr(settings, 'S3_MIN_PART_SIZE', 5 * 1024 * 1024)
+CLEAN_FILE_NAME = getattr(settings, 'CLEAN_FILE_NAME', False)
 MAX_UPLOAD_SIZE = getattr(settings, 'MAX_UPLOAD_SIZE', None)
 S3_ENDPOINT_URL = getattr(settings, 'S3_ENDPOINT_URL', None)
 
@@ -119,7 +122,6 @@ class ThreadedS3ChunkUploader(ThreadPoolExecutor):
         Arguments:
             body {bytes} -- A file chunk
         """
-        content_length = 0
         if body:
             content_length = len(body)
             self.queue.append(body)
@@ -183,6 +185,8 @@ class S3FileUploadHandler(FileUploadHandler):
         super().new_file(*args, **kwargs)
         self.parts = []
         self.bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        if CLEAN_FILE_NAME:
+            self.file_name = slugify(self.file)
         self.s3_key = generate_object_key(self.request, self.file_name)
         self.client = s3_client()
         self.multipart = self.client.create_multipart_upload(
