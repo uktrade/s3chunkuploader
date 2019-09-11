@@ -57,4 +57,5 @@ S3_PREFIX_QUERY_PARAM_NAME   Optional [__prefix]. A query param key name which p
 S3_MIN_PART_SIZE             Optional [5MB]. The part size in bytes to upload to S3
 MAX_UPLOAD_SIZE              Optional [None]. The maximum file size in bytes for an individual file.
 S3_ENDPOINT_URL              Optional [None]. The s3 endpoint url which overrides the default
+CLEAN_FILE_NAME              Optional [False]. When True, runs the filename through Django's slugify function to sanitise it.
 ============================ =====================================================================================================
