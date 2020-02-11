@@ -40,22 +40,30 @@ It is recommended to bypass csrf checks on the upload file view as the csrf chec
 handler is used.
 A replacement file field S3FileField is provided in fields.py and is satisfied with the S3 object key
 
+
+By default the S3 key will be generated based on the settings provided. However, it is possible to define a custom function
+to derive the S3 object key by providing a full dot notated path to the function in the `S3_GENERATE_OBJECT_KEY_FUNCTION`
+settings parameter.
+
+
 Settings
 --------
 
 The following settings are expected in your Django application (only 2 are required)
 
-============================ =====================================================================================================
-Setting                      Description
-============================ =====================================================================================================
-AWS_ACCESS_KEY_ID            Required. Your AWS access key
-AWS_SECRET_ACCESS_KEY        Required. The AWS secret
-AWS_REGION                   Optional. Region of S3 bucket
-S3_DOCUMENT_ROOT_DIRECTORY   Optional. Document root for all uploads (prefix)
-S3_APPEND_DATETIME_ON_UPLOAD Optional [True]. Appent the current datetime sring to the uploaded file name
-S3_PREFIX_QUERY_PARAM_NAME   Optional [__prefix]. A query param key name which provides additional prefix for the object key on S3
-S3_MIN_PART_SIZE             Optional [5MB]. The part size in bytes to upload to S3
-MAX_UPLOAD_SIZE              Optional [None]. The maximum file size in bytes for an individual file.
-S3_ENDPOINT_URL              Optional [None]. The s3 endpoint url which overrides the default
-CLEAN_FILE_NAME              Optional [False]. When True, runs the filename through Django's slugify function to sanitise it.
-============================ =====================================================================================================
+=============================== =====================================================================================================
+Setting                         Description
+=============================== =====================================================================================================
+AWS_ACCESS_KEY_ID               Required. Your AWS access key
+AWS_SECRET_ACCESS_KEY           Required. The AWS secret
+AWS_REGION                      Optional. Region of S3 bucket
+S3_DOCUMENT_ROOT_DIRECTORY      Optional. Document root for all uploads (prefix)
+S3_APPEND_DATETIME_ON_UPLOAD    Optional [True]. Appent the current datetime sring to the uploaded file name
+S3_PREFIX_QUERY_PARAM_NAME      Optional [__prefix]. A query param key name which provides additional prefix for the object key on S3
+S3_MIN_PART_SIZE                Optional [5MB]. The part size in bytes to upload to S3
+MAX_UPLOAD_SIZE                 Optional [None]. The maximum file size in bytes for an individual file.
+AWS_S3_REGION_NAME              Optional [None]. The s3 endpoint url which overrides the default
+CLEAN_FILE_NAME                 Optional [False]. When True, runs the filename through Django's slugify function to sanitise it.
+S3_GENERATE_OBJECT_KEY_FUNCTION Optional [None]. A function to generate the S3 key, receiving the request object and filename as arguments.
+AWS_S3_ENDPOINT_URL             Optional [None]. A full custom S3 endpoint url (was S3_ENDPOINT_URL in previous version)
+=============================== =====================================================================================================

@@ -1,6 +1,7 @@
 import os
 import boto3
 import logging
+import importlib
 
 from django.utils.text import slugify
 from pathlib import Path
@@ -23,7 +24,39 @@ S3_PREFIX_QUERY_PARAM_NAME = getattr(settings, 'S3_PREFIX_QUERY_PARAM_NAME', '__
 S3_MIN_PART_SIZE = getattr(settings, 'S3_MIN_PART_SIZE', 5 * 1024 * 1024)
 CLEAN_FILE_NAME = getattr(settings, 'CLEAN_FILE_NAME', False)
 MAX_UPLOAD_SIZE = getattr(settings, 'MAX_UPLOAD_SIZE', None)
-S3_ENDPOINT_URL = getattr(settings, 'S3_ENDPOINT_URL', None)
+S3_ENDPOINT_URL = getattr(settings, 'AWS_S3_ENDPOINT_URL', None)
+S3_GENERATE_OBJECT_KEY_FUNCTION = getattr(settings, 'S3_GENERATE_OBJECT_KEY_FUNCTION', None)
+
+
+# if a custom key generation function is provided, import it and prepare it for use
+if S3_GENERATE_OBJECT_KEY_FUNCTION:
+    func_parts = S3_GENERATE_OBJECT_KEY_FUNCTION.split('.')
+    module = importlib.import_module('.'.join(func_parts[0:-1]))
+    generate_object_key = getattr(module, func_parts[-1])
+else:
+    def generate_object_key(request, filename):
+        """
+        Derive the object key for S3 (Default implementation):
+        The path is made out of the S3_DOCUMENT_ROOT_DIRECTORY if set,
+        and uses specialised query params to determine any additional prefixes.
+        The current upload time it appended to the file. To prevent that,
+        set S3_APPEND_DATETIME_ON_UPLOAD to False in setings.
+        By default, the following query parameter can be provided in the request url:
+            __prefix = this will be used as a prefix for the object key (double underscore)
+        To change the query param name, the setting S3_PREFIX_QUERY_PARAM_NAME can be set.
+        """
+        filename_base, filename_ext = os.path.splitext(filename)
+        _now_postfix = ''
+        if S3_APPEND_DATETIME_ON_UPLOAD:
+            _now_postfix = f'_{timezone.now().strftime("%Y%m%d%H%M%S")}'
+        _filename = f'{filename_base}{_now_postfix}{filename_ext}'
+        path = Path(S3_DOCUMENT_ROOT_DIRECTORY)
+        if S3_PREFIX_QUERY_PARAM_NAME:
+            prefix = request.GET.get(S3_PREFIX_QUERY_PARAM_NAME)
+            if prefix:
+                path /= prefix
+        path /= _filename
+        return str(path)
 
 
 class S3Wrapper(object):
@@ -54,31 +87,6 @@ def s3_client():
     A handy method to get a reusable S3 client
     """
     return S3Wrapper.get_client()
-
-
-def generate_object_key(request, filename):
-    """
-    Derive the object key for S3.
-    The path is made out of the S3_DOCUMENT_ROOT_DIRECTORY if set,
-    and uses specialised query params to determine any additional prefixes.
-    The current upload time it appended to the file. To prevent that,
-    set S3_APPEND_DATETIME_ON_UPLOAD to False in setings.
-    By default, the following query parameter can be provided in the request url:
-        __prefix = this will be used as a prefix for the object key (double underscore)
-    To change the query param name, the setting S3_PREFIX_QUERY_PARAM_NAME can be set.
-    """
-    filename_base, filename_ext = os.path.splitext(filename)
-    _now_postfix = ''
-    if S3_APPEND_DATETIME_ON_UPLOAD:
-        _now_postfix = f'_{timezone.now().strftime("%Y%m%d%H%M%S")}'
-    _filename = f'{filename_base}{_now_postfix}{filename_ext}'
-    path = Path(settings.S3_DOCUMENT_ROOT_DIRECTORY)
-    if S3_PREFIX_QUERY_PARAM_NAME:
-        prefix = request.GET.get(S3_PREFIX_QUERY_PARAM_NAME)
-        if prefix:
-            path /= prefix
-    path /= _filename
-    return str(path)
 
 
 class UploadFailed(Exception):
@@ -181,17 +189,19 @@ class S3FileUploadHandler(FileUploadHandler):
         if MAX_UPLOAD_SIZE:
             if self.content_length > MAX_UPLOAD_SIZE:
                 raise UploadFailed('File too large')
-        
+
         super().new_file(*args, **kwargs)
         self.parts = []
         self.bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        file_name = self.file_name
         if CLEAN_FILE_NAME:
-            self.file_name = slugify(self.file)
-        self.s3_key = generate_object_key(self.request, self.file_name)
+            file_name = slugify(self.file_name)
+        self.s3_key = generate_object_key(self.request, file_name)
         self.client = s3_client()
         self.multipart = self.client.create_multipart_upload(
             Bucket=self.bucket_name,
-            Key=self.s3_key
+            Key=self.s3_key,
+            ContentType=self.content_type,
         )
         self.upload_id = self.multipart['UploadId']
         self.executor = ThreadedS3ChunkUploader(
@@ -205,6 +215,7 @@ class S3FileUploadHandler(FileUploadHandler):
         self.storage = S3Boto3Storage()
         self.file = S3Boto3StorageFile(self.s3_key, 'w', self.storage)
         self.file.original_name = self.file_name
+        self.file.content_type = self.content_type
 
     def handle_raw_input(self, input_data, META, content_length, boundary, encoding):
         self.request = input_data
@@ -228,8 +239,6 @@ class S3FileUploadHandler(FileUploadHandler):
         """
         # Add an empty body to drain the executor queue
         self.executor.add(None)
-        # close the file placeholder
-        closed = self.file.close()
         # collect all the file parts from the executor
         parts = self.executor.get_parts()
         # complete the multiplart upload
@@ -244,6 +253,8 @@ class S3FileUploadHandler(FileUploadHandler):
         # shutdown the executor and set the final file size on the file
         self.executor.shutdown()
         self.file.file_size = file_size
+        # close the file placeholder
+        self.file.close()
         return self.file
 
     def abort(self, exception):
