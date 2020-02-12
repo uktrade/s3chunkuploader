@@ -185,8 +185,9 @@ class S3FileUploadHandler(FileUploadHandler):
         """
         Create the file object to append to as data is coming in.
         """
-        # If file size is larger than the maximum allowed, then abort
-        if MAX_UPLOAD_SIZE:
+        # If content_length is provided and file size is larger than the maximum allowed, then abort
+        # Note that as per Django docs, content_length is not guaranteed to be provided.
+        if MAX_UPLOAD_SIZE and self.content_length:
             if self.content_length > MAX_UPLOAD_SIZE:
                 raise UploadFailed('File too large')
 

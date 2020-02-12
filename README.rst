@@ -67,3 +67,9 @@ CLEAN_FILE_NAME                 Optional [False]. When True, runs the filename t
 S3_GENERATE_OBJECT_KEY_FUNCTION Optional [None]. A function to generate the S3 key, receiving the request object and filename as arguments.
 AWS_S3_ENDPOINT_URL             Optional [None]. A full custom S3 endpoint url (was S3_ENDPOINT_URL in previous version)
 =============================== =====================================================================================================
+
+
+Change Log
+----------
+- 0.9: The optional setting S3_ENDPOINT_URL was renamed to AWS_S3_ENDPOINT_URL to align with django-storages .
+- 0.10: If content_length is not provided MAX_UPLOAD_SIZE cannot evaluate against it.
