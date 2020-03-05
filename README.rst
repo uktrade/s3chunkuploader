@@ -51,25 +51,30 @@ Settings
 
 The following settings are expected in your Django application (only 2 are required)
 
-=============================== =====================================================================================================
-Setting                         Description
-=============================== =====================================================================================================
-AWS_ACCESS_KEY_ID               Required. Your AWS access key
-AWS_SECRET_ACCESS_KEY           Required. The AWS secret
-AWS_REGION                      Optional. Region of S3 bucket
-S3_DOCUMENT_ROOT_DIRECTORY      Optional. Document root for all uploads (prefix)
-S3_APPEND_DATETIME_ON_UPLOAD    Optional [True]. Appent the current datetime sring to the uploaded file name
-S3_PREFIX_QUERY_PARAM_NAME      Optional [__prefix]. A query param key name which provides additional prefix for the object key on S3
-S3_MIN_PART_SIZE                Optional [5MB]. The part size in bytes to upload to S3
-MAX_UPLOAD_SIZE                 Optional [None]. The maximum file size in bytes for an individual file.
-AWS_S3_REGION_NAME              Optional [None]. The s3 endpoint url which overrides the default
-CLEAN_FILE_NAME                 Optional [False]. When True, runs the filename through Django's slugify function to sanitise it.
-S3_GENERATE_OBJECT_KEY_FUNCTION Optional [None]. A function to generate the S3 key, receiving the request object and filename as arguments.
-AWS_S3_ENDPOINT_URL             Optional [None]. A full custom S3 endpoint url (was S3_ENDPOINT_URL in previous version)
-=============================== =====================================================================================================
+================================================= ==============================================================================================================
+Setting                                           Description
+================================================= ==============================================================================================================
+CHUNK_UPLOADER_AWS_ACCESS_KEY_ID                  Required. Your AWS access key
+CHUNK_UPLOADER_AWS_SECRET_ACCESS_KEY              Required. The AWS secret
+CHUNK_UPLOADER_AWS_REGION                         Optional. Region of S3 bucket
+CHUNK_UPLOADER_S3_DOCUMENT_ROOT_DIRECTORY         Optional. Document root for all uploads (prefix)
+CHUNK_UPLOADER_S3_APPEND_DATETIME_ON_UPLOAD       Optional `[True]`. Append the current datetime sring to the uploaded file name
+CHUNK_UPLOADER_S3_PREFIX_QUERY_PARAM_NAME         Optional `[__prefix]`. A query param key name which provides additional prefix for the object key on S3
+CHUNK_UPLOADER_S3_MIN_PART_SIZE                   Optional `[5MB]`. The part size in bytes to upload to S3
+CHUNK_UPLOADER_MAX_UPLOAD_SIZE                    Optional `[None]`. The maximum file size in bytes for an individual file.
+CHUNK_UPLOADER_AWS_S3_REGION_NAME                 Optional `[None]`. The s3 endpoint url which overrides the default
+CHUNK_UPLOADER_CLEAN_FILE_NAME                    Optional `[False]`. When True, runs the filename through Django's slugify function to sanitise it.
+CHUNK_UPLOADER_S3_GENERATE_OBJECT_KEY_FUNCTION    Optional `[None]`. A function to generate the S3 key, receiving the request object and filename as arguments.
+CHUNK_UPLOADER_AWS_S3_ENDPOINT_URL                Optional `[None]`. A full custom S3 endpoint url (was S3_ENDPOINT_URL in previous version)
+================================================= ==============================================================================================================
 
+
+Unit Tests
+----------
+Unit tests can be executing by running `python -m unittest` from the projects root
 
 Change Log
 ----------
 - 0.9: The optional setting S3_ENDPOINT_URL was renamed to AWS_S3_ENDPOINT_URL to align with django-storages .
 - 0.10: If content_length is not provided MAX_UPLOAD_SIZE cannot evaluate against it.
+- 0.11: Prefixed settings keys
