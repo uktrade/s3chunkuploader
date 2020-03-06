@@ -13,19 +13,30 @@ from storages.backends.s3boto3 import S3Boto3StorageFile, S3Boto3Storage
 from django.conf import settings
 
 
+def get_setting(name, default=None):
+    """
+    Tries to get a prefixed setting key, if not present try to get a non prefixed key,
+    if all fails return the default
+
+    Arguments:
+        name {string} -- The key name to look for
+        default {any} -- The value to return if no key is found
+    """
+    return getattr(settings, f'CHUNK_UPLOADER_{name}', getattr(settings, name, default))
+
 logger = logging.getLogger(__name__)
 # get some settings
-AWS_ACCESS_KEY_ID = getattr(settings, 'AWS_ACCESS_KEY_ID')  # Required
-AWS_SECRET_ACCESS_KEY = getattr(settings, 'AWS_SECRET_ACCESS_KEY')  # Required
-AWS_REGION = getattr(settings, 'AWS_REGION', None)
-S3_DOCUMENT_ROOT_DIRECTORY = getattr(settings, 'S3_DOCUMENT_ROOT_DIRECTORY', '')
-S3_APPEND_DATETIME_ON_UPLOAD = getattr(settings, 'S3_APPEND_DATETIME_ON_UPLOAD', True)
-S3_PREFIX_QUERY_PARAM_NAME = getattr(settings, 'S3_PREFIX_QUERY_PARAM_NAME', '__prefix')
-S3_MIN_PART_SIZE = getattr(settings, 'S3_MIN_PART_SIZE', 5 * 1024 * 1024)
-CLEAN_FILE_NAME = getattr(settings, 'CLEAN_FILE_NAME', False)
-MAX_UPLOAD_SIZE = getattr(settings, 'MAX_UPLOAD_SIZE', None)
-S3_ENDPOINT_URL = getattr(settings, 'AWS_S3_ENDPOINT_URL', None)
-S3_GENERATE_OBJECT_KEY_FUNCTION = getattr(settings, 'S3_GENERATE_OBJECT_KEY_FUNCTION', None)
+AWS_ACCESS_KEY_ID = get_setting('AWS_ACCESS_KEY_ID')  # Required
+AWS_SECRET_ACCESS_KEY = get_setting('AWS_SECRET_ACCESS_KEY')  # Required
+AWS_REGION = get_setting('AWS_REGION', None)
+S3_DOCUMENT_ROOT_DIRECTORY = get_setting('S3_DOCUMENT_ROOT_DIRECTORY', '')
+S3_APPEND_DATETIME_ON_UPLOAD = get_setting('S3_APPEND_DATETIME_ON_UPLOAD', True)
+S3_PREFIX_QUERY_PARAM_NAME = get_setting('S3_PREFIX_QUERY_PARAM_NAME', '__prefix')
+S3_MIN_PART_SIZE = get_setting('S3_MIN_PART_SIZE', 5 * 1024 * 1024)
+CLEAN_FILE_NAME = get_setting('CLEAN_FILE_NAME', False)
+MAX_UPLOAD_SIZE = get_setting('MAX_UPLOAD_SIZE', None)
+S3_ENDPOINT_URL = get_setting('AWS_S3_ENDPOINT_URL', None)
+S3_GENERATE_OBJECT_KEY_FUNCTION = get_setting('S3_GENERATE_OBJECT_KEY_FUNCTION', None)
 
 
 # if a custom key generation function is provided, import it and prepare it for use
