@@ -56,6 +56,7 @@ Setting                                           Description
 ================================================= ==============================================================================================================
 CHUNK_UPLOADER_AWS_ACCESS_KEY_ID                  Required. Your AWS access key
 CHUNK_UPLOADER_AWS_SECRET_ACCESS_KEY              Required. The AWS secret
+CHUNK_UPLOADER_AWS_AWS_STORAGE_BUCKET_NAME        Required. The S3 bucket to use
 CHUNK_UPLOADER_AWS_REGION                         Optional. Region of S3 bucket
 CHUNK_UPLOADER_S3_DOCUMENT_ROOT_DIRECTORY         Optional. Document root for all uploads (prefix)
 CHUNK_UPLOADER_S3_APPEND_DATETIME_ON_UPLOAD       Optional `[True]`. Append the current datetime sring to the uploaded file name

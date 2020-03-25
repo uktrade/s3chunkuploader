@@ -37,6 +37,7 @@ CLEAN_FILE_NAME = get_setting('CLEAN_FILE_NAME', False)
 MAX_UPLOAD_SIZE = get_setting('MAX_UPLOAD_SIZE', None)
 S3_ENDPOINT_URL = get_setting('AWS_S3_ENDPOINT_URL', None)
 S3_GENERATE_OBJECT_KEY_FUNCTION = get_setting('S3_GENERATE_OBJECT_KEY_FUNCTION', None)
+AWS_STORAGE_BUCKET_NAME = get_setting('AWS_STORAGE_BUCKET_NAME', None)
 
 
 # if a custom key generation function is provided, import it and prepare it for use
@@ -204,7 +205,7 @@ class S3FileUploadHandler(FileUploadHandler):
 
         super().new_file(*args, **kwargs)
         self.parts = []
-        self.bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        self.bucket_name = AWS_STORAGE_BUCKET_NAME
         file_name = self.file_name
         if CLEAN_FILE_NAME:
             file_name = slugify(self.file_name)
