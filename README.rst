@@ -79,3 +79,4 @@ Change Log
 - 0.9: The optional setting S3_ENDPOINT_URL was renamed to AWS_S3_ENDPOINT_URL to align with django-storages .
 - 0.10: If content_length is not provided MAX_UPLOAD_SIZE cannot evaluate against it.
 - 0.11: Prefixed settings keys
+- 0.16: Relaxing requirements
