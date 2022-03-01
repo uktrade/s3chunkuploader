@@ -229,6 +229,7 @@ class S3FileUploadHandler(FileUploadHandler):
         self.file = S3Boto3StorageFile(self.s3_key, 'w', self.storage)
         self.file.original_name = self.file_name
         self.file.content_type = self.content_type
+        self.file.charset = self.charset
 
     def handle_raw_input(self, input_data, META, content_length, boundary, encoding):
         self.request = input_data
